@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    <context:property-placeholder location="common.properties, mule.${mule.env}.properties" />
+    <http:listener-config name="healthcare-onboarding-process-api-httpListenerConfig" host="0.0.0.0" port="${https.port}" doc:name="HTTP Listener Configuration" protocol="HTTPS">
+        <tls:context>
+            <tls:key-store type="jks" path="${keystore.location}" alias="${key.alias}" keyPassword="${keystore.password}" password="${key.password}"/>
+        </tls:context>
+    </http:listener-config>
+    <apikit:config name="healthcare-onboarding-process-api-config" raml="healthcare-onboarding-process-api.raml" consoleEnabled="true" doc:name="Router">
+        <apikit:flow-mapping resource="/user" action="post" content-type="application/json" flow-ref="post:/user:healthcare-onboarding-process-api-config"/>
+    </apikit:config>
+
+    <http:request-config name="HTTP_EHR2FHIR_System_API_Request_Configuration"  host="${api.ehr2fhir.system.host}" port="${api.ehr2fhir.system.port}" basePath="${api.ehr2fhir.system.basepath}" doc:name="HTTP Request Configuration" protocol="HTTPS">
+    	<tls:context>
+            <tls:trust-store path="${truststore.location}" password="${truststore.password}" type="jks"/>
+        </tls:context>
+        <http:raml-api-configuration location="healthcare-ehr2fhir-system-api/healthcare-ehr2fhir-patient-process-api.raml"/>
+    </http:request-config>
+    
+    <http:request-config name="HTTP_Identity_Service_Request_Configuration"  host="${api.identity.service.host}"  basePath="${api.identity.service.basepath}" doc:name="HTTP Request Configuration" port="${api.identity.service.port}">
+        <http:raml-api-configuration location="healthcare-identity-service-api/healthcare-identity-service-api.raml"/>
+    </http:request-config>
+    <flow name="healthcare-onboarding-process-api-main">
+        <http:listener config-ref="healthcare-onboarding-process-api-httpListenerConfig" path="/api/*" doc:name="HTTP"/>
+        <apikit:router config-ref="healthcare-onboarding-process-api-config" doc:name="APIkit Router"/>
+        <exception-strategy ref="healthcare-onboarding-process-api-apiKitGlobalExceptionMapping" doc:name="Reference Exception Strategy"/>
+    </flow>
+
+    <flow name="post:/user:healthcare-onboarding-process-api-config">
+        <set-variable variableName="patientID" value="#[java.util.UUID.randomUUID().toString()]" doc:name="Set patientID"/>
+        <dw:transform-message doc:name="Create Signup request and store Patient data">
+            <dw:input-payload doc:sample="sample_data\user-onboarding-request.json"/>
+            <dw:input-variable variableName="patientID"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+  "login": payload.login,
+  "password": payload.password,
+  "patientId": flowVars.patientID
+}]]></dw:set-payload>
+            <dw:set-variable variableName="patientData"><![CDATA[%dw 1.0
+%output application/java
+---
+payload - "login" - "password"]]></dw:set-variable>
+        </dw:transform-message>
+        <http:request config-ref="HTTP_Identity_Service_Request_Configuration" path="/signup" method="POST" doc:name="Call Identity Service Signup">
+            <http:request-builder>
+                <http:header headerName="Content-Type" value="application/json"/>
+            </http:request-builder>
+            <http:success-status-code-validator values="200,400"/>
+        </http:request>
+        <choice doc:name="Was call successful?">
+            <when expression="#[message.inboundProperties['http.status'] == &quot;200&quot;]">
+                <dw:transform-message doc:name="Create Patient FHIR">
+                    <dw:input-variable variableName="patientData"/>
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+  "resourceType": "Patient",
+  "id": ["patients", "mrn", flowVars.patientID] joinBy "/",
+  "name": [{
+    "use": "official",
+    "family": [
+      flowVars.patientData.name.family
+    ],
+    "given": [
+      flowVars.patientData.name.given
+    ],
+    "prefix": [
+      flowVars.patientData.name.prefix
+    ],
+    "suffix": [
+      flowVars.patientData.name.suffix
+    ]
+  }],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": flowVars.patientData.phone,
+      "use": "home"
+    }
+  ],
+  "address": [
+    {
+      "resourceType": "Address",
+      "line": [
+        flowVars.patientData.address.line
+      ],
+      "city": flowVars.patientData.address.city,
+      "district": flowVars.patientData.address.district,
+      "state": flowVars.patientData.address.state,
+      "postalCode": flowVars.patientData.address.postalCode,
+      "country": flowVars.patientData.address.country
+    }
+  ],
+  "careProvider": [
+    {
+      "reference": ["Practitioner", flowVars.patientData.careProvider] joinBy "/"
+    }
+  ]
+}]]></dw:set-payload>
+                </dw:transform-message>
+                <http:request config-ref="HTTP_EHR2FHIR_System_API_Request_Configuration" path="/patients/{patientIDType}/{patientID}" method="PUT" doc:name="Call EHR FHIR System API">
+                    <http:request-builder>
+                        <http:uri-param paramName="patientID" value="#[flowVars.patientID]"/>
+                        <http:uri-param paramName="patientIDType" value="mrn"/>
+                    </http:request-builder>
+                </http:request>
+                <dw:transform-message doc:name="Create JSON response">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+  "message": "Registration completed successfully. You can log in with your credentials."
+}]]></dw:set-payload>
+                </dw:transform-message>
+            </when>
+            <otherwise>
+                <set-property propertyName="http.status" value="400" doc:name="HTTP status Property"/>
+                <dw:transform-message doc:name="Create JSON response">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+  "message": "Login you are trying to set is already in use. Please, choose another one."
+}]]></dw:set-payload>
+                </dw:transform-message>
+            </otherwise>
+        </choice>
+
+
+    </flow>
+    <apikit:mapping-exception-strategy name="healthcare-onboarding-process-api-apiKitGlobalExceptionMapping">
+        <apikit:mapping statusCode="404">
+            <apikit:exception value="org.mule.module.apikit.exception.NotFoundException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+            <set-payload value="{ &quot;message&quot;: &quot;Resource not found&quot; }" doc:name="Set Payload"/>
+        </apikit:mapping>
+        <apikit:mapping statusCode="405">
+            <apikit:exception value="org.mule.module.apikit.exception.MethodNotAllowedException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+            <set-payload value="{ &quot;message&quot;: &quot;Method not allowed&quot; }" doc:name="Set Payload"/>
+        </apikit:mapping>
+        <apikit:mapping statusCode="415">
+            <apikit:exception value="org.mule.module.apikit.exception.UnsupportedMediaTypeException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+            <set-payload value="{ &quot;message&quot;: &quot;Unsupported media type&quot; }" doc:name="Set Payload"/>
+        </apikit:mapping>
+        <apikit:mapping statusCode="406">
+            <apikit:exception value="org.mule.module.apikit.exception.NotAcceptableException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+            <set-payload value="{ &quot;message&quot;: &quot;Not acceptable&quot; }" doc:name="Set Payload"/>
+        </apikit:mapping>
+        <apikit:mapping statusCode="400">
+            <apikit:exception value="org.mule.module.apikit.exception.BadRequestException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+            <set-payload value="{ &quot;message&quot;: &quot;TEST: Bad request&quot; }" doc:name="Set Payload"/>
+        </apikit:mapping>
+    </apikit:mapping-exception-strategy>
+</mule>
