@@ -24,7 +24,8 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
     	<tls:context>
             <tls:trust-store path="${truststore.location}" password="${truststore.password}" type="jks"/>
         </tls:context>
-        <http:raml-api-configuration location="healthcare-ehr2fhir-system-api/healthcare-ehr2fhir-patient-process-api.raml"/>
+        <http:raml-api-configuration location="healthcare-ehr2fhir-system-api/healthcare-system-api.raml"/>
+
     </http:request-config>
     
     <http:request-config name="HTTP_Identity_Service_Request_Configuration"  host="${api.identity.service.host}"  basePath="${api.identity.service.basepath}" doc:name="HTTP Request Configuration" port="${api.identity.service.port}">
@@ -69,7 +70,7 @@ payload - "login" - "password"]]></dw:set-variable>
 ---
 {
   "resourceType": "Patient",
-  "id": ["patients", "mrn", flowVars.patientID] joinBy "/",
+  "id": ["Patient", flowVars.patientID] joinBy "/",
   "name": [{
     "use": "official",
     "family": [
@@ -112,17 +113,15 @@ payload - "login" - "password"]]></dw:set-variable>
   ]
 }]]></dw:set-payload>
                 </dw:transform-message>
-                <http:request config-ref="HTTP_EHR2FHIR_System_API_Request_Configuration" path="/patients/{patientIDType}/{patientID}" method="PUT" doc:name="Call EHR FHIR System API">
-                    <http:request-builder>
-                        <http:uri-param paramName="patientID" value="#[flowVars.patientID]"/>
-                        <http:uri-param paramName="patientIDType" value="mrn"/>
-                    </http:request-builder>
+                <http:request config-ref="HTTP_EHR2FHIR_System_API_Request_Configuration" path="/Patient" method="POST" doc:name="Call EHR FHIR System API">
+
                 </http:request>
                 <dw:transform-message doc:name="Create JSON response">
                     <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
 ---
 {
+  "id" : flowVars.patientID,
   "message": "Registration completed successfully. You can log in with your credentials."
 }]]></dw:set-payload>
                 </dw:transform-message>
