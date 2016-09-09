@@ -75,7 +75,6 @@ payload - "login" - "password"]]></dw:set-variable>
 ---
 {
   "resourceType": "Patient",
-  "id": ["Patient", flowVars.patientID] joinBy "/",
   "name": [{
     "use": "official",
     "family": [
