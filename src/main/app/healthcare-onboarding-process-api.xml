@@ -37,7 +37,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
     </flow>
 
     <flow name="post:/user:healthcare-onboarding-process-api-config">
-        <set-variable variableName="patientID" value="#[java.util.UUID.randomUUID().toString()]" doc:name="Set patientID"/>
+
         <dw:transform-message doc:name="Create CheckLogin request, store Patient data and Login data">
             <dw:input-payload doc:sample="sample_data\user-onboarding-request.json"/>
             <dw:input-variable variableName="patientID"/>
@@ -121,13 +121,17 @@ payload - "login" - "password"]]></dw:set-variable>
                 <http:request config-ref="HTTP_EHR2FHIR_System_API_Request_Configuration" path="/Patient" method="POST" doc:name="Call EHR FHIR System API">
 
                 </http:request>
-                <dw:transform-message doc:name="Create Signup request">
+                <dw:transform-message doc:name="Create Signup request and patientId variable">
                     <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
 ---
 flowVars.loginData ++ {
 	"patientId" : (inboundProperties."location" splitBy "/")[-1]
 }]]></dw:set-payload>
+                    <dw:set-variable variableName="patientId"><![CDATA[%dw 1.0
+%output application/java
+---
+(inboundProperties."location" splitBy "/")[-1]]]></dw:set-variable>
                 </dw:transform-message>
                 <http:request config-ref="HTTP_Identity_Service_Request_Configuration" path="/signup" method="POST" doc:name="Call Identity Service SignUp"/>
                 <dw:transform-message doc:name="Create JSON response">
@@ -135,7 +139,7 @@ flowVars.loginData ++ {
 %output application/json
 ---
 {
-  "id" : flowVars.patientID,
+  "id" : flowVars.patientId,
   "message": "Registration completed successfully. You can log in with your credentials."
 }]]></dw:set-payload>
                 </dw:transform-message>
