@@ -59,6 +59,7 @@ payload - "login" - "password"]]></dw:set-variable>
   "password": payload.password
 }]]></dw:set-variable>
         </dw:transform-message>
+        <logger message="Checking of login '#[flowVars.loginData.login]' availability" level="INFO" doc:name="Log check of login availability"/>
         <http:request config-ref="HTTP_Identity_Service_Request_Configuration" path="/checkLogin" method="POST" doc:name="Call Identity Service CheckLogin">
             <http:request-builder>
                 <http:header headerName="Content-Type" value="application/json"/>
@@ -68,6 +69,7 @@ payload - "login" - "password"]]></dw:set-variable>
         </http:request>
         <choice doc:name="Was call successful?">
             <when expression="#[message.inboundProperties['http.status'] == &quot;200&quot;]">
+                <logger message="Login is available" level="INFO" doc:name="Log login available"/>
                 <dw:transform-message doc:name="Create Patient FHIR">
                     <dw:input-variable variableName="patientData"/>
                     <dw:set-payload><![CDATA[%dw 1.0
@@ -117,6 +119,7 @@ payload - "login" - "password"]]></dw:set-variable>
   ]
 }]]></dw:set-payload>
                 </dw:transform-message>
+                <logger message="Creating patient: #[message.payloadAs(String)]" level="INFO" doc:name="Log create patient"/>
                 <http:request config-ref="HTTP_EHR2FHIR_System_API_Request_Configuration" path="/Patient" method="POST" doc:name="Call EHR FHIR System API">
 
                 </http:request>
@@ -132,6 +135,7 @@ flowVars.loginData ++ {
 ---
 (inboundProperties."location" splitBy "/")[-1]]]></dw:set-variable>
                 </dw:transform-message>
+                <logger message="Signing up patient with ID: #[dw(&quot;(inboundProperties.\&quot;location\&quot; splitBy \&quot;/\&quot;)[-1]&quot;)]" level="INFO" doc:name="Log signup patient"/>
                 <http:request config-ref="HTTP_Identity_Service_Request_Configuration" path="/signup" method="POST" doc:name="Call Identity Service SignUp"/>
                 <dw:transform-message doc:name="Create JSON response">
                     <dw:set-payload><![CDATA[%dw 1.0
@@ -144,6 +148,7 @@ flowVars.loginData ++ {
                 </dw:transform-message>
             </when>
             <otherwise>
+                <logger message="Login is already in use" level="INFO" doc:name="Log login already in use"/>
                 <set-property propertyName="http.status" value="400" doc:name="HTTP status Property"/>
                 <dw:transform-message doc:name="Create JSON response">
                     <dw:set-payload><![CDATA[%dw 1.0
