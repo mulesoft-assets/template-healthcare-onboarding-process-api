@@ -21,14 +21,15 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
     </apikit:config>
 
     <http:request-config name="HTTP_EHR2FHIR_System_API_Request_Configuration"  host="${api.ehr2fhir.system.host}" port="${api.ehr2fhir.system.port}" basePath="${api.ehr2fhir.system.basepath}" doc:name="HTTP Request Configuration" >
-        <http:raml-api-configuration location="healthcare-ehr2fhir-system-api/healthcare-system-api.raml"/>
-
-
+        <http:raml-api-configuration location="healthcare-fhir-system-api/healthcare-system-api.raml"/>
     </http:request-config>
     
     <http:request-config name="HTTP_Identity_Service_Request_Configuration"  host="${api.identity.service.host}"  basePath="${api.identity.service.basepath}" doc:name="HTTP Request Configuration" port="${api.identity.service.port}">
         <http:raml-api-configuration location="healthcare-identity-service-api/healthcare-identity-service-api.raml"/>
 
+    </http:request-config>
+    <http:request-config name="HTTP_SFHC2FHIR_System_API_Request_Configuration" host="${api.sfhc2fhir.system.host}" port="${api.sfhc2fhir.system.port}" basePath="${api.sfhc2fhir.system.basepath}" doc:name="HTTP Request Configuration">
+        <http:raml-api-configuration location="healthcare-fhir-system-api/healthcare-system-api.raml"/>
     </http:request-config>
     <flow name="healthcare-onboarding-process-api-main">
         <http:listener config-ref="healthcare-onboarding-process-api-httpListenerConfig" path="/api/*" doc:name="HTTP"/>
@@ -72,71 +73,42 @@ payload - "login" - "password"]]></dw:set-variable>
                 <logger message="Login is available" level="INFO" doc:name="Log login available"/>
                 <dw:transform-message doc:name="Create Patient FHIR">
                     <dw:input-variable variableName="patientData"/>
-                    <dw:set-payload><![CDATA[%dw 1.0
-%output application/json
----
-{
-  "resourceType": "Patient",
-  "name": [{
-    "use": "official",
-    "family": [
-      flowVars.patientData.name.family
-    ],
-    "given": [
-      flowVars.patientData.name.given
-    ],
-    "prefix": [
-      flowVars.patientData.name.prefix
-    ],
-    "suffix": [
-      flowVars.patientData.name.suffix
-    ]
-  }],
-  "telecom": [
-    {
-      "system": "phone",
-      "value": flowVars.patientData.phone,
-      "use": "home"
-    }
-  ],
-  "address": [
-    {
-      "resourceType": "Address",
-      "line": [
-        flowVars.patientData.address.line
-      ],
-      "city": flowVars.patientData.address.city,
-      "district": flowVars.patientData.address.district,
-      "state": flowVars.patientData.address.state,
-      "postalCode": flowVars.patientData.address.postalCode,
-      "country": flowVars.patientData.address.country
-    }
-  ],
-  "careProvider": [
-    {
-      "reference": ["Practitioner", flowVars.patientData.careProvider] joinBy "/"
-    }
-  ]
-}]]></dw:set-payload>
+                    <dw:set-payload resource="classpath:patient_fhir.dwl"/>
+                    <dw:set-variable variableName="sfhcPatient" resource="classpath:patient_fhir.dwl"/>   
                 </dw:transform-message>
                 <logger message="Creating patient: #[message.payloadAs(String)]" level="INFO" doc:name="Log create patient"/>
-                <http:request config-ref="HTTP_EHR2FHIR_System_API_Request_Configuration" path="/Patient" method="POST" doc:name="Call EHR FHIR System API">
+                <http:request config-ref="HTTP_EHR2FHIR_System_API_Request_Configuration" path="/Patient" method="POST" doc:name="Create Patient using EHR FHIR System API">
 
                 </http:request>
-                <dw:transform-message doc:name="Create Signup request and patientId variable">
+                <dw:transform-message doc:name="Create Patient FHIR with Identifier">
                     <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
 ---
-flowVars.loginData ++ {
-	"patientId" : (inboundProperties."location" splitBy "/")[-1]
+flowVars.sfhcPatient ++ {
+	identifier : [{
+		value : (inboundProperties."location" splitBy "/")[-1]
+	}]
 }]]></dw:set-payload>
                     <dw:set-variable variableName="patientId"><![CDATA[%dw 1.0
 %output application/java
 ---
 (inboundProperties."location" splitBy "/")[-1]]]></dw:set-variable>
                 </dw:transform-message>
+                <logger message="Created sfhc patient: #[message.payloadAs(String)]" level="INFO" doc:name="Log create patient in SFHC"/>
+                <http:request config-ref="HTTP_SFHC2FHIR_System_API_Request_Configuration" path="/Patient" method="POST" doc:name="Create Patient using SFHC FHIR System API"/>
+
+                <dw:transform-message doc:name="Create Signup request and patientId variable">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+flowVars.loginData ++ {
+	"patientId" : flowVars.patientId
+}]]></dw:set-payload>
+
+                </dw:transform-message>
                 <logger message="Signing up patient with ID: #[dw(&quot;(inboundProperties.\&quot;location\&quot; splitBy \&quot;/\&quot;)[-1]&quot;)]" level="INFO" doc:name="Log signup patient"/>
                 <http:request config-ref="HTTP_Identity_Service_Request_Configuration" path="/signup" method="POST" doc:name="Call Identity Service SignUp"/>
+
                 <dw:transform-message doc:name="Create JSON response">
                     <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
