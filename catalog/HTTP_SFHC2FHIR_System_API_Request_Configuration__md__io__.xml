@@ -1,6 +1,6 @@
 <metadata__cache__entry>
   <version>5.2.0.0</version>
-  <connectorName>HTTP_EHR2FHIR_System_API_Request_Configuration</connectorName>
+  <connectorName>HTTP_SFHC2FHIR_System_API_Request_Configuration</connectorName>
   <metadataIo class="tree-map">
     <entry>
       <string>POST:/Patient</string>
@@ -10,7 +10,7 @@
           <org.mule.tooling.metadata.cache.DefaultMetadataCacheEntry>
             <input class="org.mule.common.metadata.DefaultMetaData">
               <payload class="org.mule.tooling.metadata.api.TypeRefMetaDataModel">
-                <connectorName>HTTP_EHR2FHIR_System_API_Request_Configuration</connectorName>
+                <connectorName>HTTP_SFHC2FHIR_System_API_Request_Configuration</connectorName>
                 <typeId>POST:/Patient_request</typeId>
                 <category>DEFAULT</category>
               </payload>

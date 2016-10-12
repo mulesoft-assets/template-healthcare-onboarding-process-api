@@ -17,7 +17,9 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
         </tls:context>
     </http:listener-config>
     <apikit:config name="healthcare-onboarding-process-api-config" raml="healthcare-onboarding-process-api.raml" consoleEnabled="true" doc:name="Router">
-        <apikit:flow-mapping resource="/user" action="post" content-type="application/json" flow-ref="post:/user:healthcare-onboarding-process-api-config"/>
+        <apikit:flow-mapping resource="/users" action="post" content-type="application/json" flow-ref="post:/users:healthcare-onboarding-process-api-config"/>
+        <apikit:flow-mapping resource="/users" action="patch" flow-ref="patch:/users:healthcare-onboarding-process-api-config"/>
+
     </apikit:config>
 
     <http:request-config name="HTTP_EHR2FHIR_System_API_Request_Configuration"  host="${api.ehr2fhir.system.host}" port="${api.ehr2fhir.system.port}" basePath="${api.ehr2fhir.system.basepath}" doc:name="HTTP Request Configuration" >
@@ -26,6 +28,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
     
     <http:request-config name="HTTP_Identity_Service_Request_Configuration"  host="${api.identity.service.host}"  basePath="${api.identity.service.basepath}" doc:name="HTTP Request Configuration" port="${api.identity.service.port}">
         <http:raml-api-configuration location="healthcare-identity-service-api/healthcare-identity-service-api.raml"/>
+
 
     </http:request-config>
     <http:request-config name="HTTP_SFHC2FHIR_System_API_Request_Configuration" host="${api.sfhc2fhir.system.host}" port="${api.sfhc2fhir.system.port}" basePath="${api.sfhc2fhir.system.basepath}" doc:name="HTTP Request Configuration">
@@ -37,46 +40,35 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
         <exception-strategy ref="healthcare-onboarding-process-api-apiKitGlobalExceptionMapping" doc:name="Reference Exception Strategy"/>
     </flow>
 
-    <flow name="post:/user:healthcare-onboarding-process-api-config">
-
-        <dw:transform-message doc:name="Create CheckLogin request, store Patient data and Login data">
-            <dw:input-payload doc:sample="sample_data\user-onboarding-request.json"/>
-            <dw:input-variable variableName="patientID"/>
+    <flow name="post:/users:healthcare-onboarding-process-api-config">
+        <dw:transform-message doc:name="Transform input JSON into Map and create patientData variable">
             <dw:set-payload><![CDATA[%dw 1.0
-%output application/json
+%output application/java
 ---
-{
-  "login": payload.login
-}]]></dw:set-payload>
+payload]]></dw:set-payload>
             <dw:set-variable variableName="patientData"><![CDATA[%dw 1.0
 %output application/java
 ---
-payload - "login" - "password"]]></dw:set-variable>
-            <dw:set-variable variableName="loginData"><![CDATA[%dw 1.0
-%output application/java
----
-{
-  "login": payload.login,
-  "password": payload.password
-}]]></dw:set-variable>
+payload]]></dw:set-variable>
         </dw:transform-message>
-        <logger message="Checking of login '#[flowVars.loginData.login]' availability" level="INFO" doc:name="Log check of login availability"/>
-        <http:request config-ref="HTTP_Identity_Service_Request_Configuration" path="/checkLogin" method="POST" doc:name="Call Identity Service CheckLogin">
+
+        <http:request config-ref="HTTP_Identity_Service_Request_Configuration" path="/users" method="GET" doc:name="Call Identity Service GET users by login">
             <http:request-builder>
-                <http:header headerName="Content-Type" value="application/json"/>
+                <http:query-param paramName="login" value="#[payload.login]"/>
+
 
             </http:request-builder>
             <http:success-status-code-validator values="200,400"/>
         </http:request>
-        <choice doc:name="Was call successful?">
-            <when expression="#[message.inboundProperties['http.status'] == &quot;200&quot;]">
-                <logger message="Login is available" level="INFO" doc:name="Log login available"/>
+        <choice doc:name="Does user with the same login exist?">
+            <when expression="#[dw('sizeOf payload') == 0]">
+                <logger message="Login is available" level="INFO" doc:name="Log 'Login is available'"/>
                 <dw:transform-message doc:name="Create Patient FHIR">
                     <dw:input-variable variableName="patientData"/>
                     <dw:set-payload resource="classpath:patient_fhir.dwl"/>
                     <dw:set-variable variableName="sfhcPatient" resource="classpath:patient_fhir.dwl"/>   
                 </dw:transform-message>
-                <logger message="Creating patient: #[message.payloadAs(String)]" level="INFO" doc:name="Log create patient"/>
+                <logger message="Creating patient: #[message.payloadAs(String)]" level="INFO" doc:name="Log 'Creating patient...'"/>
                 <http:request config-ref="HTTP_EHR2FHIR_System_API_Request_Configuration" path="/Patient" method="POST" doc:name="Create Patient using EHR FHIR System API">
 
                 </http:request>
@@ -94,34 +86,36 @@ flowVars.sfhcPatient ++ {
 ---
 (inboundProperties."location" splitBy "/")[-1]]]></dw:set-variable>
                 </dw:transform-message>
-                <logger message="Created sfhc patient: #[message.payloadAs(String)]" level="INFO" doc:name="Log create patient in SFHC"/>
+                <logger message="Creating patient in SFHC: #[message.payloadAs(String)]" level="INFO" doc:name="Log 'Creating patient in SFHC'"/>
                 <http:request config-ref="HTTP_SFHC2FHIR_System_API_Request_Configuration" path="/Patient" method="POST" doc:name="Create Patient using SFHC FHIR System API"/>
 
-                <dw:transform-message doc:name="Create Signup request and patientId variable">
+                <dw:transform-message doc:name="Create POST User request">
                     <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
 ---
-flowVars.loginData ++ {
+{	
+	"login" : flowVars.patientData.login,
+	"password" : flowVars.patientData.password,
 	"patientId" : flowVars.patientId
 }]]></dw:set-payload>
 
                 </dw:transform-message>
-                <logger message="Signing up patient with ID: #[dw(&quot;(inboundProperties.\&quot;location\&quot; splitBy \&quot;/\&quot;)[-1]&quot;)]" level="INFO" doc:name="Log signup patient"/>
-                <http:request config-ref="HTTP_Identity_Service_Request_Configuration" path="/signup" method="POST" doc:name="Call Identity Service SignUp"/>
+                <logger message="Creating user with patient ID: #[dw(&quot;(inboundProperties.\&quot;location\&quot; splitBy \&quot;/\&quot;)[-1]&quot;)]" level="INFO" doc:name="Log 'Creating user'"/>
+                <http:request config-ref="HTTP_Identity_Service_Request_Configuration" path="/users" method="POST" doc:name="Call Identity Service POST User"/>
 
                 <dw:transform-message doc:name="Create JSON response">
                     <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
 ---
 {
-  "id" : flowVars.patientId,
+  "patientId" : flowVars.patientId,
   "message": "Registration completed successfully. You can log in with your credentials."
 }]]></dw:set-payload>
                 </dw:transform-message>
             </when>
             <otherwise>
-                <logger message="Login is already in use" level="INFO" doc:name="Log login already in use"/>
-                <set-property propertyName="http.status" value="400" doc:name="HTTP status Property"/>
+                <logger message="Login is already in use" level="INFO" doc:name="Log 'Login already in use'"/>
+                <set-property propertyName="http.status" value="409" doc:name="HTTP status Property"/>
                 <dw:transform-message doc:name="Create JSON response">
                     <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
@@ -134,6 +128,63 @@ flowVars.loginData ++ {
         </choice>
 
 
+    </flow>
+    <flow name="patch:/users:healthcare-onboarding-process-api-config">
+        <dw:transform-message doc:name="Transform input JSON into Map and create patientData variable">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+inboundProperties."http.query.params".login]]></dw:set-payload>
+            <dw:set-variable variableName="patientData"><![CDATA[%dw 1.0
+%output application/java
+---
+payload ++ {
+	login: inboundProperties."http.query.params".login
+}]]></dw:set-variable>
+        </dw:transform-message>
+        <http:request config-ref="HTTP_Identity_Service_Request_Configuration" path="/users" method="GET" doc:name="Call Identity Service to GET user by login">
+            <http:request-builder>
+                <http:query-param paramName="login" value="#[payload]"/>
+            </http:request-builder>
+            <http:success-status-code-validator values="200,400"/>
+        </http:request>
+        <choice doc:name="Does user with the login exist?">
+            <when expression="#[dw('sizeOf payload') != 0]">
+                <dw:transform-message doc:name="Create PATCH User request">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{	
+	"password" : flowVars.patientData.password
+}]]></dw:set-payload>
+                </dw:transform-message>
+                <http:request config-ref="HTTP_Identity_Service_Request_Configuration" path="/users/{login}" method="PATCH" doc:name="Call Identity Service PATCH User">
+                    <http:request-builder>
+                        <http:uri-param paramName="login" value="#[flowVars.patientData.login]"/>
+
+                    </http:request-builder>
+                </http:request>
+                <dw:transform-message doc:name="Create JSON response">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+  "message": "User was updated successfully."
+}]]></dw:set-payload>
+                </dw:transform-message>
+            </when>
+            <otherwise>
+                <set-property propertyName="http.status" value="404" doc:name="HTTP status Property"/>
+                <dw:transform-message doc:name="Create JSON response">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+  "message": "User with specified login does not exist."
+}]]></dw:set-payload>
+                </dw:transform-message>
+            </otherwise>
+        </choice>
     </flow>
     <apikit:mapping-exception-strategy name="healthcare-onboarding-process-api-apiKitGlobalExceptionMapping">
         <apikit:mapping statusCode="404">
@@ -160,6 +211,11 @@ flowVars.loginData ++ {
             <apikit:exception value="org.mule.module.apikit.exception.BadRequestException" />
             <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
             <set-payload value="{ &quot;message&quot;: &quot;TEST: Bad request&quot; }" doc:name="Set Payload"/>
+        </apikit:mapping>
+        <apikit:mapping statusCode="422">
+            <apikit:exception value="org.mule.module.http.internal.request.ResponseValidatorException"/>
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+            <set-payload value="{ &quot;message&quot;: Unprocessable Entity}" doc:name="Set Payload"/>
         </apikit:mapping>
     </apikit:mapping-exception-strategy>
 </mule>

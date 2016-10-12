@@ -3,51 +3,12 @@
   <connectorName>HTTP_Identity_Service_Request_Configuration</connectorName>
   <metadataIo class="tree-map">
     <entry>
-      <string>POST:/checkLogin</string>
+      <string>GET:/users</string>
       <map>
         <entry>
           <string>__default__</string>
           <org.mule.tooling.metadata.cache.DefaultMetadataCacheEntry>
             <input class="org.mule.common.metadata.DefaultMetaData">
-              <payload class="org.mule.tooling.metadata.api.TypeRefMetaDataModel">
-                <connectorName>HTTP_Identity_Service_Request_Configuration</connectorName>
-                <typeId>POST:/checkLogin_request</typeId>
-                <category>DEFAULT</category>
-              </payload>
-              <properties>
-                <entry>
-                  <org.mule.common.metadata.MetaDataPropertyScope>RECORD</org.mule.common.metadata.MetaDataPropertyScope>
-                  <org.mule.common.metadata.MetaDataProperties>
-                    <fields/>
-                  </org.mule.common.metadata.MetaDataProperties>
-                </entry>
-                <entry>
-                  <org.mule.common.metadata.MetaDataPropertyScope>FLOW</org.mule.common.metadata.MetaDataPropertyScope>
-                  <org.mule.common.metadata.MetaDataProperties>
-                    <fields/>
-                  </org.mule.common.metadata.MetaDataProperties>
-                </entry>
-                <entry>
-                  <org.mule.common.metadata.MetaDataPropertyScope>INBOUND</org.mule.common.metadata.MetaDataPropertyScope>
-                  <org.mule.common.metadata.MetaDataProperties>
-                    <fields/>
-                  </org.mule.common.metadata.MetaDataProperties>
-                </entry>
-                <entry>
-                  <org.mule.common.metadata.MetaDataPropertyScope>OUTBOUND</org.mule.common.metadata.MetaDataPropertyScope>
-                  <org.mule.common.metadata.MetaDataProperties>
-                    <fields/>
-                  </org.mule.common.metadata.MetaDataProperties>
-                </entry>
-                <entry>
-                  <org.mule.common.metadata.MetaDataPropertyScope>SESSION</org.mule.common.metadata.MetaDataPropertyScope>
-                  <org.mule.common.metadata.MetaDataProperties>
-                    <fields/>
-                  </org.mule.common.metadata.MetaDataProperties>
-                </entry>
-              </properties>
-            </input>
-            <output class="org.mule.common.metadata.DefaultMetaData">
               <payload class="org.mule.common.metadata.DefaultUnknownMetaDataModel">
                 <dataType>UNKNOWN</dataType>
                 <metaDataModelPropertiesManager>
@@ -74,13 +35,68 @@
                   </org.mule.common.metadata.MetaDataProperties>
                 </entry>
                 <entry>
+                  <org.mule.common.metadata.MetaDataPropertyScope>SESSION</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataProperties>
+                    <fields/>
+                  </org.mule.common.metadata.MetaDataProperties>
+                </entry>
+                <entry>
                   <org.mule.common.metadata.MetaDataPropertyScope>OUTBOUND</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataProperties>
+                    <fields/>
+                  </org.mule.common.metadata.MetaDataProperties>
+                </entry>
+              </properties>
+            </input>
+            <output class="org.mule.common.metadata.DefaultMetaData">
+              <payload class="org.mule.common.metadata.DefaultUnknownMetaDataModel">
+                <dataType>UNKNOWN</dataType>
+                <metaDataModelPropertiesManager>
+                  <properties>
+                    <org.mule.common.metadata.property.StructureIdentifierMetaDataModelProperty>
+                      <metaDataKey class="org.mule.common.metadata.DefaultMetaDataKey">
+                        <id>GET:/users_response</id>
+                        <displayName>GET:/users_response</displayName>
+                        <category>DEFAULT</category>
+                        <metaDataKeyPropertiesManager>
+                          <properties>
+                            <org.mule.common.metadata.key.property.dsql.DsqlFromMetaDataKeyProperty/>
+                          </properties>
+                        </metaDataKeyPropertiesManager>
+                      </metaDataKey>
+                      <derivedStructure>false</derivedStructure>
+                      <generatedStructure>false</generatedStructure>
+                    </org.mule.common.metadata.property.StructureIdentifierMetaDataModelProperty>
+                  </properties>
+                </metaDataModelPropertiesManager>
+              </payload>
+              <properties>
+                <entry>
+                  <org.mule.common.metadata.MetaDataPropertyScope>RECORD</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataProperties>
+                    <fields/>
+                  </org.mule.common.metadata.MetaDataProperties>
+                </entry>
+                <entry>
+                  <org.mule.common.metadata.MetaDataPropertyScope>FLOW</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataProperties>
+                    <fields/>
+                  </org.mule.common.metadata.MetaDataProperties>
+                </entry>
+                <entry>
+                  <org.mule.common.metadata.MetaDataPropertyScope>INBOUND</org.mule.common.metadata.MetaDataPropertyScope>
                   <org.mule.common.metadata.MetaDataProperties>
                     <fields/>
                   </org.mule.common.metadata.MetaDataProperties>
                 </entry>
                 <entry>
                   <org.mule.common.metadata.MetaDataPropertyScope>SESSION</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataProperties>
+                    <fields/>
+                  </org.mule.common.metadata.MetaDataProperties>
+                </entry>
+                <entry>
+                  <org.mule.common.metadata.MetaDataPropertyScope>OUTBOUND</org.mule.common.metadata.MetaDataPropertyScope>
                   <org.mule.common.metadata.MetaDataProperties>
                     <fields/>
                   </org.mule.common.metadata.MetaDataProperties>
@@ -92,16 +108,39 @@
       </map>
     </entry>
     <entry>
-      <string>POST:/signup</string>
+      <string>PUT:/users/{login}</string>
       <map>
         <entry>
           <string>__default__</string>
           <org.mule.tooling.metadata.cache.DefaultMetadataCacheEntry>
             <input class="org.mule.common.metadata.DefaultMetaData">
-              <payload class="org.mule.tooling.metadata.api.TypeRefMetaDataModel">
-                <connectorName>HTTP_Identity_Service_Request_Configuration</connectorName>
-                <typeId>POST:/signup_request</typeId>
-                <category>DEFAULT</category>
+              <payload class="org.mule.common.metadata.DefaultUnknownMetaDataModel">
+                <dataType>UNKNOWN</dataType>
+                <metaDataModelPropertiesManager>
+                  <properties>
+                    <org.mule.common.metadata.property.TextBasedExampleMetaDataModelProperty>
+                      <exampleContent>{&#xd;
+  &quot;login&quot;: &quot;login&quot;,&#xd;
+  &quot;password&quot;: &quot;password&quot;,&#xd;
+  &quot;patientId&quot;: &quot;12345&quot;&#xd;
+}</exampleContent>
+                    </org.mule.common.metadata.property.TextBasedExampleMetaDataModelProperty>
+                    <org.mule.common.metadata.property.StructureIdentifierMetaDataModelProperty>
+                      <metaDataKey class="org.mule.common.metadata.DefaultMetaDataKey">
+                        <id>PUT:/users/{login}_request</id>
+                        <displayName>PUT:/users/{login}_request</displayName>
+                        <category>DEFAULT</category>
+                        <metaDataKeyPropertiesManager>
+                          <properties>
+                            <org.mule.common.metadata.key.property.dsql.DsqlFromMetaDataKeyProperty/>
+                          </properties>
+                        </metaDataKeyPropertiesManager>
+                      </metaDataKey>
+                      <derivedStructure>false</derivedStructure>
+                      <generatedStructure>false</generatedStructure>
+                    </org.mule.common.metadata.property.StructureIdentifierMetaDataModelProperty>
+                  </properties>
+                </metaDataModelPropertiesManager>
               </payload>
               <properties>
                 <entry>
@@ -123,13 +162,13 @@
                   </org.mule.common.metadata.MetaDataProperties>
                 </entry>
                 <entry>
-                  <org.mule.common.metadata.MetaDataPropertyScope>OUTBOUND</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataPropertyScope>SESSION</org.mule.common.metadata.MetaDataPropertyScope>
                   <org.mule.common.metadata.MetaDataProperties>
                     <fields/>
                   </org.mule.common.metadata.MetaDataProperties>
                 </entry>
                 <entry>
-                  <org.mule.common.metadata.MetaDataPropertyScope>SESSION</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataPropertyScope>OUTBOUND</org.mule.common.metadata.MetaDataPropertyScope>
                   <org.mule.common.metadata.MetaDataProperties>
                     <fields/>
                   </org.mule.common.metadata.MetaDataProperties>
@@ -137,10 +176,31 @@
               </properties>
             </input>
             <output class="org.mule.common.metadata.DefaultMetaData">
-              <payload class="org.mule.tooling.metadata.api.TypeRefMetaDataModel">
-                <connectorName>HTTP_Identity_Service_Request_Configuration</connectorName>
-                <typeId>POST:/signup_response</typeId>
-                <category>DEFAULT</category>
+              <payload class="org.mule.common.metadata.DefaultUnknownMetaDataModel">
+                <dataType>UNKNOWN</dataType>
+                <metaDataModelPropertiesManager>
+                  <properties>
+                    <org.mule.common.metadata.property.TextBasedExampleMetaDataModelProperty>
+                      <exampleContent>{&#xd;
+  &quot;message&quot;: &quot;Signup completed successfully. You can log in with your credentials.&quot;&#xd;
+}</exampleContent>
+                    </org.mule.common.metadata.property.TextBasedExampleMetaDataModelProperty>
+                    <org.mule.common.metadata.property.StructureIdentifierMetaDataModelProperty>
+                      <metaDataKey class="org.mule.common.metadata.DefaultMetaDataKey">
+                        <id>PUT:/users/{login}_response</id>
+                        <displayName>PUT:/users/{login}_response</displayName>
+                        <category>DEFAULT</category>
+                        <metaDataKeyPropertiesManager>
+                          <properties>
+                            <org.mule.common.metadata.key.property.dsql.DsqlFromMetaDataKeyProperty/>
+                          </properties>
+                        </metaDataKeyPropertiesManager>
+                      </metaDataKey>
+                      <derivedStructure>false</derivedStructure>
+                      <generatedStructure>false</generatedStructure>
+                    </org.mule.common.metadata.property.StructureIdentifierMetaDataModelProperty>
+                  </properties>
+                </metaDataModelPropertiesManager>
               </payload>
               <properties>
                 <entry>
@@ -162,13 +222,13 @@
                   </org.mule.common.metadata.MetaDataProperties>
                 </entry>
                 <entry>
-                  <org.mule.common.metadata.MetaDataPropertyScope>OUTBOUND</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataPropertyScope>SESSION</org.mule.common.metadata.MetaDataPropertyScope>
                   <org.mule.common.metadata.MetaDataProperties>
                     <fields/>
                   </org.mule.common.metadata.MetaDataProperties>
                 </entry>
                 <entry>
-                  <org.mule.common.metadata.MetaDataPropertyScope>SESSION</org.mule.common.metadata.MetaDataPropertyScope>
+                  <org.mule.common.metadata.MetaDataPropertyScope>OUTBOUND</org.mule.common.metadata.MetaDataPropertyScope>
                   <org.mule.common.metadata.MetaDataProperties>
                     <fields/>
                   </org.mule.common.metadata.MetaDataProperties>
