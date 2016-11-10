@@ -25,6 +25,7 @@
       "use": "home"
     }
   ],
+  "birthDate": flowVars.patientData.birthDate,
   ("gender": flowVars.patientData.gender) when (flowVars.patientData.gender != null),
   "address": [
     {
