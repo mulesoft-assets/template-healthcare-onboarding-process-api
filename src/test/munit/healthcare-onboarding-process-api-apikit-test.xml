@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:mock="http://www.mulesoft.org/schema/mule/mock" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+http://www.mulesoft.org/schema/mule/mock http://www.mulesoft.org/schema/mule/mock/current/mule-mock.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+    <spring:beans>
+        <spring:import resource="classpath:healthcare-onboarding-process-api.xml" />
+    </spring:beans>
+    
+    <context:property-placeholder location="mule.test.properties" />
+    
+    <munit:config mock-connectors="false" mock-inbounds="false" doc:name="MUnit configuration"/>
+   
+    <http:request-config name="Onboarding_HTTP"  port="${https.port}" basePath="/api" doc:name="HTTP Request Configuration" protocol="HTTPS" host="localhost">
+        <tls:context>
+            <tls:trust-store insecure="true"/>
+        </tls:context>
+    </http:request-config>
+    
+    <munit:test name="patch:/users:application/json:healthcare-onboarding-process-api-config-200-application/json-FlowTest" description="Verifying functionality of [patch:/users:application/json:healthcare-onboarding-process-api-config-200-application/json]" >
+        <mock:when messageProcessor=".*:.*" doc:name="Mock GET /users?login=">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['Call Identity Service GET users by login']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[getResource('mocks/get_is_users_by_login_found.json').asString()]" mimeType="application/json"/>
+        </mock:when>
+        <mock:when messageProcessor=".*:.*" doc:name="Mock IS PATCH /users">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['Call Identity Service PATCH User']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[NullPayload.getInstance()]"/>
+        </mock:when>
+        <set-payload value="#[getResource('scaffolder/request/patch_users_application_json.json').asString()]" doc:name="Set Payload"/>
+        <set-variable variableName="login" value="yeti@test.com" doc:name="login" />
+        <http:request config-ref="Onboarding_HTTP" method="PATCH" path="/users" doc:name="HTTP">
+            <http:request-builder>
+                <http:query-param paramName="login" value="#[flowVars['login']]"/>
+                <http:header headerName="Accept" value="application/json"/>
+                <http:header headerName="Content-Type" value="application/json"/>
+
+            </http:request-builder>
+        </http:request>
+        <object-to-string-transformer doc:name="http response to string" />
+        <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(200))]" doc:name="assert that - http.status eq 200" />
+
+    </munit:test>
+    <munit:test name="patch:/users:application/json:healthcare-onboarding-process-api-config-404-application/json-FlowTest" description="Verifying functionality of [patch:/users:application/json:healthcare-onboarding-process-api-config-404-application/json]" >
+        <mock:when messageProcessor=".*:.*" doc:name="Mock GET /users?login=">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['Call Identity Service GET users by login']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[getResource('mocks/get_is_users_by_login_not_found.json').asString()]" mimeType="application/json"/>
+        </mock:when>
+        <set-payload value="#[getResource('scaffolder/request/patch_users_application_json.json').asString()]" doc:name="Set Payload"/>
+        <set-variable variableName="login" value="yeti@test.com" doc:name="login" />
+        <http:request config-ref="Onboarding_HTTP" method="PATCH" path="/users" doc:name="HTTP">
+            <http:request-builder>
+                <http:query-param paramName="login" value="#[flowVars['login']]"/>
+                <http:header headerName="Accept" value="application/json"/>
+                <http:header headerName="Content-Type" value="application/json"/>
+
+            </http:request-builder>
+            <http:success-status-code-validator values="404" />
+        </http:request>
+        <object-to-string-transformer doc:name="http response to string" />
+        <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(404))]" doc:name="assert that - http.status eq 404" />
+
+    </munit:test>
+
+    <munit:test name="post:/users:application/json:healthcare-onboarding-process-api-config-201-application/json-FlowTest" description="Verifying functionality of [post:/users:application/json:healthcare-onboarding-process-api-config-201-application/json]">
+        <mock:when messageProcessor=".*:.*" doc:name="Mock GET /users?login=">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['Call Identity Service GET users by login']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[getResource('mocks/get_is_users_by_login_not_found.json').asString()]" mimeType="application/json"/>
+        </mock:when>
+        <mock:when messageProcessor=".*:.*" doc:name="Mock EHR POST /Patient">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['Create Patient using EHR FHIR System API']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[NullPayload.getInstance()]">
+                <mock:inbound-properties>
+                    <mock:inbound-property key="Location" value="http://localhost/api/Patient/13248416"/>
+                    <mock:inbound-property key="http.status" value="#[200]"/>
+                </mock:inbound-properties>
+            </mock:then-return>
+        </mock:when>
+        <mock:when messageProcessor=".*:.*" doc:name="Mock SFHC POST /Patient">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['Create Patient using SFHC FHIR System API']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[NullPayload.getInstance()]">
+                <mock:inbound-properties>
+                    <mock:inbound-property key="http.status" value="#[200]"/>
+                </mock:inbound-properties>
+            </mock:then-return>
+        </mock:when>
+        <mock:when messageProcessor=".*:.*" doc:name="Mock Identity Service POST /users">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['Call Identity Service POST User']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[NullPayload.getInstance()]">
+                <mock:inbound-properties>
+                    <mock:inbound-property key="http.status" value="#[200]"/>
+                </mock:inbound-properties>
+            </mock:then-return>
+        </mock:when>
+        <set-payload value="#[getResource('scaffolder/request/post_users_application_json.json').asString()]" doc:name="Set Payload"/>
+        <http:request config-ref="Onboarding_HTTP" method="POST" path="/users" doc:name="HTTP">
+            <http:request-builder>
+                <http:header headerName="Accept" value="application/json"/>
+                <http:header headerName="Content-Type" value="application/json"/>
+
+            </http:request-builder>
+        </http:request>
+        <object-to-string-transformer doc:name="http response to string" />
+        <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(201))]" doc:name="assert that - http.status eq 201" />
+    </munit:test>
+    
+    
+    <munit:test name="post:/users:application/json:healthcare-onboarding-process-api-config-409-application/json-FlowTest" description="Verifying functionality of [post:/users:application/json:healthcare-onboarding-process-api-config-409-application/json]" >
+        <mock:when messageProcessor=".*:.*" doc:name="Mock GET /users?login=">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['Call Identity Service GET users by login']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[getResource('mocks/get_is_users_by_login_found.json').asString()]" mimeType="application/json"/>
+
+        </mock:when>
+        <mock:when messageProcessor=".*:.*" doc:name="Mock EHR POST /Patient">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['Create Patient using EHR FHIR System API']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[NullPayload.getInstance()]">
+                <mock:inbound-properties>
+                    <mock:inbound-property key="Location" value="http://localhost/api/Patient/13248416"/>
+                    <mock:inbound-property key="http.status" value="#[200]"/>
+                </mock:inbound-properties>
+            </mock:then-return>
+        </mock:when>
+        <mock:when messageProcessor=".*:.*" doc:name="Mock SFHC POST /Patient">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['Create Patient using SFHC FHIR System API']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[NullPayload.getInstance()]">
+                <mock:inbound-properties>
+                    <mock:inbound-property key="http.status" value="#[200]"/>
+                </mock:inbound-properties>
+            </mock:then-return>
+        </mock:when>
+        <mock:when messageProcessor=".*:.*" doc:name="Mock Identity Service POST /users">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['Call Identity Service POST User']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[NullPayload.getInstance()]">
+                <mock:inbound-properties>
+                    <mock:inbound-property key="http.status" value="#[200]"/>
+                </mock:inbound-properties>
+            </mock:then-return>
+        </mock:when>
+        <set-payload value="#[getResource('scaffolder/request/post_users_application_json.json').asString()]" doc:name="Set Payload"/>
+        <http:request config-ref="Onboarding_HTTP" method="POST" path="/users" doc:name="HTTP">
+            <http:request-builder>
+                <http:header headerName="Accept" value="application/json"/>
+                <http:header headerName="Content-Type" value="application/json"/>
+
+            </http:request-builder>
+            <http:success-status-code-validator values="409" />
+        </http:request>
+        <object-to-string-transformer doc:name="http response to string" />
+        <munit:assert-true message="The HTTP Status code is not correct!" condition="#[messageInboundProperty('http.status').is(eq(409))]" doc:name="assert that - http.status eq 409" />
+
+    </munit:test>
+</mule>
