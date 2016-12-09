@@ -64,6 +64,9 @@
 					</execution>
 				</executions>
 				<configuration>
+					<environmentVariables> 
+						<mule.env>test</mule.env> 
+					</environmentVariables>
 					<dynamicPorts>
 						<dynamicPort>http.port</dynamicPort>
 					</dynamicPorts>
