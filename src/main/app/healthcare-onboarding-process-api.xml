@@ -42,6 +42,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 
     <flow name="post:/users:healthcare-onboarding-process-api-config">
         <dw:transform-message doc:name="Transform input JSON into Map and create patientData variable">
+        	<dw:input-payload mimeType="application/json"/>
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/java
 ---
