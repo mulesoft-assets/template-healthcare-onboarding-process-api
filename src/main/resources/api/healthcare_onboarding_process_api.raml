@@ -1,0 +1,83 @@
+#%RAML 1.0
+baseUri: https://mocksvc.mulesoft.com/mocks/7cbfbf05-d418-4ad9-b80e-4c407a52c79c # 
+title: Healthcare Onboarding Process API
+version: v2
+mediaType: application/json
+
+types: 
+  Patient: !include exchange_modules/47f07e0a-f578-47d4-9591-d9e7afffb0fc.healthcare/patient/1.0.2/patient.raml
+  SuccessResponse:  !include dataTypes/SuccessResponse.raml
+  ErrorResponse:  !include dataTypes/ErrorResponse.raml
+  User:
+    type: Patient
+    properties: 
+      phone?: string
+      login?: string
+      password?: string
+
+/users:
+  displayName: Onboarding process for user
+  post:
+    description: Register new user
+    body:
+      application/json:
+        type: User
+        example: !include examples/request/post_user.raml
+    responses: 
+      201:
+        body: 
+          application/json:
+            type: SuccessResponse
+      409:
+        body: 
+          application/json:
+            type: ErrorResponse
+            example: |  
+              {
+                "message": "Login you are trying to set is already in use. Please, choose another one."
+              }
+  patch:
+    description: Update the user specified by login
+    queryParameters: 
+      login:
+        required: true
+        type: string
+        description: String representing the login of the user
+    body: 
+      application/json:
+        type: object
+        example: | 
+          {
+            "password": "newPassword"  
+          }
+    responses: 
+      200:
+        body: 
+          application/json:
+            type: object
+            example: | 
+              {
+                "message": "User was updated successfully."
+              }
+      404:
+        body: 
+          application/json:
+            type: ErrorResponse
+            example: | 
+              {
+                "message": "User with specified login does not exist."
+              }
+
+      422:
+        body: 
+          application/json:
+            type: ErrorResponse
+            example: | 
+              {
+                "message": "Unprocessable Entity"
+              }
+
+                
+
+        
+  

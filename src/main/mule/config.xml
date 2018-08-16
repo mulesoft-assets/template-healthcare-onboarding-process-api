@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+	<http:listener-config
+		name="healthcare_onboarding_process_api-httpListenerConfig">
+		<http:listener-connection host="0.0.0.0"
+			port="${https.port}">
+			<tls:context >
+				<tls:key-store type="jks" path="${keystore.location}" alias="${key.alias}" keyPassword="${keystore.password}" password="${key.password}" />
+			</tls:context>
+		</http:listener-connection>
+	</http:listener-config>
+	<apikit:config name="healthcare_onboarding_process_api-config"
+		raml="healthcare_onboarding_process_api.raml" outboundHeadersMapName="outboundHeaders"
+		httpStatusVarName="httpStatus" />
+	<http:request-config name="HTTP_Identity_Service_Request_Configuration"
+		doc:name="HTTP Request configuration" doc:id="535abe4e-e004-4dd6-bcea-54d45fad4cfe"
+		basePath="${api.identity.service.basepath}">
+		<http:request-connection host="${api.identity.service.host}"
+			port="${api.identity.service.port}" />
+	</http:request-config>
+	<configuration-properties doc:name="Configuration properties"
+		doc:id="cded263d-00e9-46f1-b780-2394307f0dca" file="mule.dev.properties" />
+	<http:request-config name="HTTP_EHR2FHIR_System_API_Request_Configuration"
+		doc:name="HTTP Request configuration" doc:id="333fb97e-9ed6-4f18-9e0f-0e33b89caf5d"
+		basePath="${api.ehr2fhir.system.basepath}">
+		<http:request-connection host="${api.ehr2fhir.system.host}"
+			port="${api.ehr2fhir.system.port}" />
+	</http:request-config>
+	<http:request-config name="HTTP_SFHC2FHIR_System_API_Request_Configuration"
+		doc:name="HTTP Request configuration" doc:id="4966b15c-95b0-40a4-bf91-96e5184788dd"
+		basePath="${api.sfhc2fhir.system.basepath}">
+		<http:request-connection host="${api.sfhc2fhir.system.host}"
+			port="${api.sfhc2fhir.system.port}" />
+	</http:request-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="fb589fb7-ed4e-47d4-9641-29b778ad6946" file="common.properties" />
+</mule>
