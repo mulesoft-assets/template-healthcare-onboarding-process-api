@@ -95,10 +95,6 @@ output application/json
 			doc:name="Transform input JSON into Map and create patientData variable"
 			doc:id="bff93d43-f25d-4770-a6ad-6676518d0ab2">
 			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/java
----
-payload]]></ee:set-payload>
 			</ee:message>
 			<ee:variables>
 				<ee:set-variable variableName="patientData"><![CDATA[%dw 2.0
@@ -113,7 +109,7 @@ payload]]></ee:set-variable>
 			<http:query-params><![CDATA[#[output applicaton/java
 ---
 {
-	login : payload.login
+	login : vars.patientData.login
 }]]]></http:query-params>
 		</http:request>
 		<choice doc:name="Does user with the same login exist?" doc:id="bffc4035-1ebe-456d-800c-db156916b129">

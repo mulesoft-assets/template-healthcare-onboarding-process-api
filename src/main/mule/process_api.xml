@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
-	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
-http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd ">
 	<flow name="healthcare_onboarding_process_api-main">
 		<http:listener config-ref="healthcare_onboarding_process_api-httpListenerConfig"
 			path="/api/*">
@@ -21,8 +18,7 @@ http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/
 		<error-handler>
 			<on-error-propagate type="APIKIT:BAD_REQUEST">
 				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"
-					doc:id="1813e1e1-0e17-4b22-811a-973ad4e03e86" doc:name="400">
+					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -30,14 +26,14 @@ output application/json
 {message: "Bad request"}]]></ee:set-payload>
 					</ee:message>
 					<ee:variables>
-						<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+						<ee:set-variable variableName="httpStatus">400
+						</ee:set-variable>
 					</ee:variables>
 				</ee:transform>
 			</on-error-propagate>
 			<on-error-propagate type="APIKIT:NOT_FOUND">
 				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"
-					doc:id="8310aced-4eab-4c2a-8fa6-01f4080387d9" doc:name="404">
+					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -45,14 +41,14 @@ output application/json
 {message: "Resource not found"}]]></ee:set-payload>
 					</ee:message>
 					<ee:variables>
-						<ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable>
+						<ee:set-variable variableName="httpStatus">404
+						</ee:set-variable>
 					</ee:variables>
 				</ee:transform>
 			</on-error-propagate>
 			<on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
 				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"
-					doc:id="9011b18e-6802-4d03-b81d-0d37e97da19d" doc:name="405">
+					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -60,14 +56,14 @@ output application/json
 {message: "Method not allowed"}]]></ee:set-payload>
 					</ee:message>
 					<ee:variables>
-						<ee:set-variable variableName="httpStatus"><![CDATA[405]]></ee:set-variable>
+						<ee:set-variable variableName="httpStatus">405
+						</ee:set-variable>
 					</ee:variables>
 				</ee:transform>
 			</on-error-propagate>
 			<on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
 				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"
-					doc:id="33fa695b-9d75-4e45-a179-3c51b2c393c1" doc:name="406">
+					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -75,14 +71,14 @@ output application/json
 {message: "Not acceptable"}]]></ee:set-payload>
 					</ee:message>
 					<ee:variables>
-						<ee:set-variable variableName="httpStatus"><![CDATA[406]]></ee:set-variable>
+						<ee:set-variable variableName="httpStatus">406
+						</ee:set-variable>
 					</ee:variables>
 				</ee:transform>
 			</on-error-propagate>
 			<on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
 				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"
-					doc:id="f30a728b-4cf4-48b0-a3e2-c6ba9df4cf3b" doc:name="415">
+					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -90,14 +86,14 @@ output application/json
 {message: "Unsupported media type"}]]></ee:set-payload>
 					</ee:message>
 					<ee:variables>
-						<ee:set-variable variableName="httpStatus"><![CDATA[415]]></ee:set-variable>
+						<ee:set-variable variableName="httpStatus">415
+						</ee:set-variable>
 					</ee:variables>
 				</ee:transform>
 			</on-error-propagate>
 			<on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
 				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"
-					doc:id="ddb3a3c5-a456-494b-9f0c-b98ae2851e1d" doc:name="501">
+					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -105,7 +101,8 @@ output application/json
 {message: "Not Implemented"}]]></ee:set-payload>
 					</ee:message>
 					<ee:variables>
-						<ee:set-variable variableName="httpStatus"><![CDATA[501]]></ee:set-variable>
+						<ee:set-variable variableName="httpStatus">501
+						</ee:set-variable>
 					</ee:variables>
 				</ee:transform>
 			</on-error-propagate>
@@ -143,12 +140,12 @@ output application/json
 	</flow>
 	<flow
 		name="patch:\users:application\json:healthcare_onboarding_process_api-config">
-		<flow-ref doc:name="Patch user" doc:id="e58116ca-1ed8-4e3e-8e05-c1b1826a2140" name="patchUser"/>
-		
+		<flow-ref doc:name="Patch user" doc:id="ea6bd899-5428-4003-8653-30bc4be63053"
+			name="patchUser" />
 	</flow>
 	<flow
 		name="post:\users:application\json:healthcare_onboarding_process_api-config">
-		<flow-ref doc:name="Create user" doc:id="6e82777f-9413-42a2-ad76-876ac4060803" name="createUser"/>
-		
+		<flow-ref doc:name="Create user" doc:id="5f83af73-7418-4cb5-9a50-ba78703d6c3c"
+			name="createUser" />
 	</flow>
 </mule>
