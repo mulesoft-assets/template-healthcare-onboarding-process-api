@@ -1,148 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
-	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
-http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
-	<flow name="healthcare_onboarding_process_api-main">
-		<http:listener config-ref="healthcare_onboarding_process_api-httpListenerConfig"
-			path="/api/*">
-			<http:response statusCode="#[vars.httpStatus default 200]">
-				<http:headers>#[vars.outboundHeaders default {}]</http:headers>
-			</http:response>
-			<http:error-response statusCode="#[vars.httpStatus default 500]">
-				<http:body>#[payload]</http:body>
-				<http:headers>#[vars.outboundHeaders default {}]</http:headers>
-			</http:error-response>
-		</http:listener>
-		<apikit:router config-ref="healthcare_onboarding_process_api-config" />
-		<error-handler>
-			<on-error-propagate type="APIKIT:BAD_REQUEST">
-				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"
-					doc:id="1813e1e1-0e17-4b22-811a-973ad4e03e86" doc:name="400">
-					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{message: "Bad request"}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables>
-						<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</on-error-propagate>
-			<on-error-propagate type="APIKIT:NOT_FOUND">
-				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"
-					doc:id="8310aced-4eab-4c2a-8fa6-01f4080387d9" doc:name="404">
-					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{message: "Resource not found"}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables>
-						<ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</on-error-propagate>
-			<on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
-				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"
-					doc:id="9011b18e-6802-4d03-b81d-0d37e97da19d" doc:name="405">
-					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{message: "Method not allowed"}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables>
-						<ee:set-variable variableName="httpStatus"><![CDATA[405]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</on-error-propagate>
-			<on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
-				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"
-					doc:id="33fa695b-9d75-4e45-a179-3c51b2c393c1" doc:name="406">
-					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{message: "Not acceptable"}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables>
-						<ee:set-variable variableName="httpStatus"><![CDATA[406]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</on-error-propagate>
-			<on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
-				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"
-					doc:id="f30a728b-4cf4-48b0-a3e2-c6ba9df4cf3b" doc:name="415">
-					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{message: "Unsupported media type"}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables>
-						<ee:set-variable variableName="httpStatus"><![CDATA[415]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</on-error-propagate>
-			<on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
-				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"
-					doc:id="ddb3a3c5-a456-494b-9f0c-b98ae2851e1d" doc:name="501">
-					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{message: "Not Implemented"}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables>
-						<ee:set-variable variableName="httpStatus"><![CDATA[501]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</on-error-propagate>
-		</error-handler>
-	</flow>
-	<flow name="healthcare_onboarding_process_api-console">
-		<http:listener config-ref="healthcare_onboarding_process_api-httpListenerConfig"
-			path="/console/*">
-			<http:response statusCode="#[vars.httpStatus default 200]">
-				<http:headers>#[vars.outboundHeaders default {}]</http:headers>
-			</http:response>
-			<http:error-response statusCode="#[vars.httpStatus default 500]">
-				<http:body>#[payload]</http:body>
-				<http:headers>#[vars.outboundHeaders default {}]</http:headers>
-			</http:error-response>
-		</http:listener>
-		<apikit:console config-ref="healthcare_onboarding_process_api-config" />
-		<error-handler>
-			<on-error-propagate type="APIKIT:NOT_FOUND">
-				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{message: "Resource not found"}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables>
-						<ee:set-variable variableName="httpStatus">404
-						</ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</on-error-propagate>
-		</error-handler>
-	</flow>
-	<flow
-		name="patch:\users:application\json:healthcare_onboarding_process_api-config">
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+	http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="patchUser" doc:id="b83ddcce-95a1-4997-a01e-7ac5a2fca166">
 		<ee:transform
 			doc:name="Transform input JSON into Map and create patientData variable"
 			doc:id="123302f9-bbcd-42d8-a29f-0b59d60d4800">
@@ -225,8 +90,7 @@ output application/json
 			</otherwise>
 		</choice>
 	</flow>
-	<flow
-		name="post:\users:application\json:healthcare_onboarding_process_api-config">
+	<flow name="createUser" doc:id="55e25e55-020a-4e0c-9913-e213f18238bc">
 		<ee:transform
 			doc:name="Transform input JSON into Map and create patientData variable"
 			doc:id="bff93d43-f25d-4770-a6ad-6676518d0ab2">
@@ -254,25 +118,18 @@ payload]]></ee:set-variable>
 		</http:request>
 		<choice doc:name="Does user with the same login exist?" doc:id="bffc4035-1ebe-456d-800c-db156916b129">
 			<when expression="#[sizeOf(payload) == 0]">
-				<logger level="INFO" doc:name="Log 'Login is available'"
-					doc:id="7a8f3b44-2be9-41e8-9870-70bcb2acc336" message="Login is available" />
-				<ee:transform doc:name="Create Patient FHIR"
-					doc:id="757d6c2d-bb5f-494e-b981-ae2e5b56be54">
+				<logger level="INFO" doc:name="Log 'Login is available'" doc:id="7a8f3b44-2be9-41e8-9870-70bcb2acc336" message="Login is available" />
+				<ee:transform doc:name="Create Patient FHIR" doc:id="757d6c2d-bb5f-494e-b981-ae2e5b56be54">
 					<ee:message>
 						<ee:set-payload resource="patient_fhir.dwl" />
 					</ee:message>
 					<ee:variables>
-						<ee:set-variable resource="patient_fhir.dwl"
-							variableName="sfhcPatient" />
+						<ee:set-variable resource="patient_fhir.dwl" variableName="sfhcPatient" />
 					</ee:variables>
 				</ee:transform>
-				<logger level="INFO" doc:name="Log 'Creating patient...'"
-					doc:id="08cb58fa-4e33-4ab1-8346-409a4b0e4cab" message="Creating patient: #[payload]" />
-				<http:request method="POST"
-					doc:name="Create Patient using EHR FHIR System API" doc:id="d440c031-dd17-4bc5-bf64-2f0a83b58e74"
-					config-ref="HTTP_EHR2FHIR_System_API_Request_Configuration" path="/Patient" />
-				<ee:transform doc:name="Create Patient FHIR with Identifier"
-					doc:id="d2f8ec66-02c3-4ee6-a394-cba175493329">
+				<logger level="INFO" doc:name="Log 'Creating patient...'" doc:id="08cb58fa-4e33-4ab1-8346-409a4b0e4cab" message="Creating patient: #[payload]" />
+				<http:request method="POST" doc:name="Create Patient using EHR FHIR System API" doc:id="d440c031-dd17-4bc5-bf64-2f0a83b58e74" config-ref="HTTP_EHR2FHIR_System_API_Request_Configuration" path="/Patient" />
+				<ee:transform doc:name="Create Patient FHIR with Identifier" doc:id="d2f8ec66-02c3-4ee6-a394-cba175493329">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -290,13 +147,9 @@ output application/java
 payload.id]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
-				<logger level="INFO" doc:name="Log 'Creating patient in SFHC'"
-					doc:id="5ba63dbb-b68f-4a4c-9c86-efd36b391d62" message="Creating patient in SFHC: #[payload]" />
-				<http:request method="POST"
-					doc:name="Create Patient using SFHC FHIR System API" doc:id="65ad8e70-6b70-44b4-80a8-fae50c7cd162"
-					config-ref="HTTP_SFHC2FHIR_System_API_Request_Configuration" path="/Patient" />
-				<ee:transform doc:name="Create POST User request"
-					doc:id="9aee454b-9fb9-48fa-ba2e-a587ec9e5ac7">
+				<logger level="INFO" doc:name="Log 'Creating patient in SFHC'" doc:id="5ba63dbb-b68f-4a4c-9c86-efd36b391d62" message="Creating patient in SFHC: #[payload]" />
+				<http:request method="POST" doc:name="Create Patient using SFHC FHIR System API" doc:id="65ad8e70-6b70-44b4-80a8-fae50c7cd162" config-ref="HTTP_SFHC2FHIR_System_API_Request_Configuration" path="/Patient" />
+				<ee:transform doc:name="Create POST User request" doc:id="9aee454b-9fb9-48fa-ba2e-a587ec9e5ac7">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -308,13 +161,9 @@ output application/json
 }]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-				<logger level="INFO" doc:name="Log 'Creating user'"
-					doc:id="6f3baf1e-4e41-45f3-ac5a-6aa3379f51aa" message="Creating user with patient ID: #[payload.patientId]" />
-				<http:request method="POST" doc:name="Call Identity Service POST User"
-					doc:id="5f17a5a7-b2b6-4ca2-867c-f783b78a669d" config-ref="HTTP_Identity_Service_Request_Configuration"
-					path="/users" />
-				<ee:transform doc:name="Create JSON response"
-					doc:id="c0a3b90f-0bb2-4e1c-b879-003b22d04a7e">
+				<logger level="INFO" doc:name="Log 'Creating user'" doc:id="6f3baf1e-4e41-45f3-ac5a-6aa3379f51aa" message="Creating user with patient ID: #[payload.patientId]" />
+				<http:request method="POST" doc:name="Call Identity Service POST User" doc:id="5f17a5a7-b2b6-4ca2-867c-f783b78a669d" config-ref="HTTP_Identity_Service_Request_Configuration" path="/users" />
+				<ee:transform doc:name="Create JSON response" doc:id="c0a3b90f-0bb2-4e1c-b879-003b22d04a7e">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -327,11 +176,9 @@ output application/json
 				</ee:transform>
 			</when>
 			<otherwise>
-				<logger level="INFO" doc:name="Log 'Login already in use'"
-					doc:id="204822ab-76e8-4c83-a6f9-1d662f76be2f" message="Login is already in use" />
-				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd"
-					doc:id="7101be51-4b99-4608-9b7b-5ae02c4a46a8" doc:name="Create JSON response">
+				<logger level="INFO" doc:name="Log 'Login already in use'" doc:id="204822ab-76e8-4c83-a6f9-1d662f76be2f" message="Login is already in use" />
+				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="7101be51-4b99-4608-9b7b-5ae02c4a46a8" doc:name="Create JSON response">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json

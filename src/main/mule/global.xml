@@ -9,10 +9,7 @@ http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/
 	<http:listener-config
 		name="healthcare_onboarding_process_api-httpListenerConfig">
 		<http:listener-connection host="0.0.0.0"
-			port="${https.port}">
-			<tls:context >
-				<tls:key-store type="jks" path="${keystore.location}" alias="${key.alias}" keyPassword="${keystore.password}" password="${key.password}" />
-			</tls:context>
+			port="${https.port}" tlsContext="TLS_Context" protocol="HTTPS">
 		</http:listener-connection>
 	</http:listener-config>
 	<apikit:config name="healthcare_onboarding_process_api-config"
@@ -39,4 +36,7 @@ http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/
 			port="${api.sfhc2fhir.system.port}" />
 	</http:request-config>
 	<configuration-properties doc:name="Configuration properties" doc:id="fb589fb7-ed4e-47d4-9641-29b778ad6946" file="common.properties" />
+	<tls:context name="TLS_Context" doc:name="TLS Context" doc:id="1a87df8b-3531-40b4-8932-2f1918a6a9d6" >
+		<tls:key-store type="jks" path="${keystore.location}" alias="${key.alias}" keyPassword="${keystore.password}" password="${key.password}" />
+	</tls:context>
 </mule>

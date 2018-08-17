@@ -21,13 +21,13 @@ Please review the terms of the license before downloading and using this templat
 
 As a new Healthcare API Led Connectivity Web Portal user I want a microservice to execute the signup process.
 
-This template should serve as a foundation for implementing an API for Signing up a new Web Portal user. API is defined using [RAML](https://docs.mulesoft.com/anypoint-platform-for-apis/walkthrough-design-existing#about-raml) and this implementation uses [APIkit](https://docs.mulesoft.com/anypoint-platform-for-apis/apikit-basic-anatomy#basic-anatomy). The Onboarding Process API retrieves credentials and patient data from the Portal Experience API and checks the Identity Service if the login is available. If it is available the API triggers creation of Patient from the underlying microservices defined in EHR to FHIR System API in JSON following the FHIR specification [version 1.0.2 DSTU2](https://www.hl7.org/FHIR/DSTU2/index.html) and new user with the specified credentials and Patient ID will be created in the Identity Service. If the login is not available user will be notified about that and able to choose the different login name.
+This template should serve as a foundation for implementing an API for Signing up a new Web Portal user. API is defined using [RAML](https://docs.mulesoft.com/anypoint-platform-for-apis/walkthrough-design-existing#about-raml) and this implementation uses [APIkit](https://docs.mulesoft.com/anypoint-platform-for-apis/apikit-basic-anatomy#basic-anatomy). The Onboarding Process API retrieves credentials and patient data from the Portal Experience API and checks the Identity Service if the login is available. If it is available the API triggers creation of Patient from the underlying microservices defined in EHR to FHIR System API in JSON following the FHIR specification [version 3.0.1 STU3](https://www.hl7.org/FHIR/index.html) and new user with the specified credentials and Patient ID will be created in the Identity Service. If the login is not available user will be notified about that and able to choose the different login name.
 
 The Onboarding Process API is part of the Healthcare Templates Solution and it is triggered by the Portal Experience API.
 
 # Considerations <a name="considerations"/>
 
-To make this Anypoint Template run, there are certain preconditions that must be considered. **Failling to do so could lead to unexpected behavior of the template.**
+To make this Anypoint Template run, there are certain preconditions that must be considered. **Failing to do so could lead to unexpected behavior of the template.**
 
 ## APIs security considerations <a name="apissecurityconsiderations"/>
 This Process API is meant to be deployed within a CloudHub and managed using the API Platform Manager.
@@ -63,7 +63,7 @@ You can find a detailed description on how to do so in this [Documentation Page]
 ## Running on Studio <a name="runonstudio"/>
 Once you have imported you Anypoint Template into Anypoint Studio you need to follow these steps to run it:
 
-+ Generate keystore (You can find a detailed description on how to do so in this [Documentation Page](https://docs.mulesoft.com/mule-user-guide/v/3.7/tls-configuration#generating-keystores-and-truststores))
++ Generate keystore (You can find a detailed description on how to do so in this [Documentation Page](https://docs.mulesoft.com/mule4-user-guide/v/4.1/tls-configuration))
 + Locate the properties file `mule.dev.properties`, in src/main/resources
 + Complete all the properties required as per the examples in the section [Properties to be configured](#propertiestobeconfigured)
 + Once that is done, right click on you Anypoint Template project folder 
@@ -97,6 +97,8 @@ In order to use this Mule Anypoint Template you need to configure properties (AP
 + api.ehr2fhir.system.host `ehr2fhir-system-api.cloudhub.io`
 + api.ehr2fhir.system.basepath `/api`
 + api.ehr2fhir.system.port `80`
++ api.ehr2fhir.system.protocol `HTTP`
 + api.sfhc2fhir.system.host `sfhc2fhir-system-api.cloudhub.io`
 + api.sfhc2fhir.system.basepath `/api`
 + api.sfhc2fhir.system.port `80`
++ api.sfhc2fhir.system.protocol `HTTP`
