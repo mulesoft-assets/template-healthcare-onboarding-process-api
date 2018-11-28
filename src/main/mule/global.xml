@@ -42,4 +42,5 @@ http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/
 		<tls:key-store type="jks" path="${keystore.location}"
 			alias="${key.alias}" keyPassword="${keystore.password}" password="${key.password}" />
 	</tls:context>
+	<global-property doc:name="Global Property" doc:id="aef90f2d-8d49-42f9-8030-e1390402c728" name="mule.env" value="dev" />
 </mule>
