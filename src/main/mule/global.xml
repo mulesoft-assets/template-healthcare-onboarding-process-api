@@ -6,6 +6,8 @@
 	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+	
+	<global-property doc:name="Global Property" doc:id="c24cb297-7e13-4280-b117-da01eae59eb4" name="mule.env" value="dev" />
 	<http:listener-config
 		name="healthcare_onboarding_process_api-httpListenerConfig">
 		<http:listener-connection host="0.0.0.0"
@@ -42,4 +44,5 @@ http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/
 		<tls:key-store type="jks" path="${keystore.location}"
 			alias="${key.alias}" keyPassword="${keystore.password}" password="${key.password}" />
 	</tls:context>
+
 </mule>
