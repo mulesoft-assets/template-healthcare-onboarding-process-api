@@ -1,8 +1,7 @@
 # Template Onboarding Process API
 
 # License Agreement
-Note that using this template is subject to the conditions of this [MuleSoft License Agreement](https://s3.amazonaws.com/templates-examples/AnypointTemplateLicense.pdf).
-Review the terms of the license before downloading and using this template. In short, you are allowed to use the template for free with Mule ESB Enterprise Edition, CloudHub, or as a trial in Anypoint Studio.
+This template is subject to the conditions of the [MuleSoft License Agreement](https://s3.amazonaws.com/templates-examples/AnypointTemplateLicense.pdf). Review the terms of the license before downloading and using this template. You can use this template for free with the Mule Enterprise Edition, CloudHub, or as a trial in Anypoint Studio. 
 
 # Use Case
 
@@ -12,27 +11,23 @@ This template should serve as a foundation for implementing an API to sign up a 
 
 The Onboarding Process API is part of the Healthcare Templates Solution and it is triggered by the Portal Experience API.
 
-# License Agreement
-
-This template is subject to the conditions of the [MuleSoft License Agreement](https://s3.amazonaws.com/templates-examples/AnypointTemplateLicense.pdf). Review the terms of the license before downloading and using this template. You can use this template for free with the Mule Enterprise Edition, CloudHub, or as a trial in Anypoint Studio. 
-
 # Considerations
 
 To make this Anypoint Template run, there are certain preconditions that must be considered. Failing to do so could lead to unexpected behavior of the template.
 
-## APIs security considerations
+## API Security Considerations
 This Process API is meant to be deployed within a CloudHub and managed using the API Platform Manager.
 
-### Exposing external endpoints with HTTPS
-Triggered by the Portal Experience API using HTTPS
+### Exposing External Endpoints with HTTPS
+Triggered by the Portal Experience API using HTTPS.
 
-### Exposing internal endpoints with RAML and HTTP
-Interconnected internally with EHR to FHIR System API and Identity Service API using HTTP
+### Exposing Internal Endpoints with RAML and HTTP
+Interconnected internally with EHR to FHIR System API and Identity Service API using HTTP.
 
 # Run it!
 Simple steps to get Onboarding Process API running.
 
-## Running on premise
+## Running on Premise
 In this section we detail the way you should run your Anypoint Template on your computer.
 
 
@@ -67,7 +62,7 @@ After opening your template in Anypoint Studio, follow these steps to run it:
 6. Inside the dialog, select Environment and set the variable `mule.env` to the value `dev`.
 7. Click `Run`.
 
-## Running on Mule ESB stand alone
+## Running on Mule Stand Alone
 Complete all properties in one of the property files, for example in [mule.prod.properties](../master/src/main/resources/mule.prod.properties) and run your app with the corresponding environment variable to use it. To follow the example, use `mule.env=prod`.
 
 ## Run in CloudHub
