@@ -13,15 +13,15 @@ The Onboarding Process API is part of the Healthcare Templates Solution and it i
 
 # Considerations
 
-To make this Anypoint Template run, there are certain preconditions that must be considered. Failing to do so could lead to unexpected behavior of the template.
+To run this template, there are certain preconditions that must be considered. Failing to do so could lead to unexpected behavior of the template.
 
 ## API Security Considerations
-This Process API is meant to be deployed within a CloudHub and managed using the API Platform Manager.
+This Process API is meant to be deployed within Runtime Manager.
 
-### Exposing External Endpoints with HTTPS
+### Expose External Endpoints with HTTPS
 Triggered by the Portal Experience API using HTTPS.
 
-### Exposing Internal Endpoints with RAML and HTTP
+### Expose Internal Endpoints with RAML and HTTP
 Interconnected internally with EHR to FHIR System API and Identity Service API using HTTP.
 
 # Run it!
@@ -72,16 +72,17 @@ After adding your application to Runtime Manager, go to **Manage Application** >
 In Studio, right click your project name in Package Explorer and select **Anypoint Platform** > **Deploy on CloudHub**.
 
 ## Properties to Configure
-To use this Mule Anypoint Template you need to configure properties (APIs, configurations, etc.) either in properties file or in CloudHub as Environment Variables. The Onboarding Process API is using secured connection. Detail list with examples.
+To use this Mule Anypoint Template you need to configure properties (APIs, configurations, etc.) either in properties file or in CloudHub as Environment Variables. The Onboarding Process API is using secured connection. 
 
-### Application properties
+### Application Properties
+
 - https.port `8082`
 - keystore.location `keystore.jks`
 - keystore.password `pass123!`
 - key.password `pass123!`
 - key.alias `1`
 
-### API calls configuration
+### API Calls Configuration
 
 - api.identity.service.host `identity-service-api-host.com`
 - api.identity.service.basepath `/api`
